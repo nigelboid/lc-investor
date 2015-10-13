@@ -14,7 +14,7 @@ from operator import itemgetter
 # Define some global constants
 #
 
-VERSION= '0.5'
+VERSION= '0.6'
 MINIMUM_INVESTMENT_AMOUNT= 25
 MINIMUM_EMPLOYMENT_MONTHS= 12
 MINIMUM_DELINQUECY_MONTHS= 12
@@ -252,7 +252,7 @@ def BuyNotes(options, request, ownedNotes, shoppingList, cash):
   # compose our order and submit it
   result= SubmitOrder(options, request, ComposeOrder(options, request, ownedNotes, shoppingList, cash))
 
-  return (result)
+  return result
 
 
 
@@ -419,13 +419,16 @@ def Report(options, response):
   if not options.quiet:
     print
     print 'Order execution report:'
-    if response[KEY_ORDER_ID] <> None:
-      print '\tOrder ID {}'.format(response[KEY_ORDER_ID])
-      for orderConfirmation in response[KEY_CONFIRMATIONS]:
-        # report results of each note order
-        print '\tLoan ID {} invested ${:6,.2f} of ${:6,.2f} requested (codes: {})'.format(orderConfirmation[KEY_LOAN_ID], orderConfirmation[KEY_INVESTED_AMOUNT], orderConfirmation[KEY_REQUESTED_AMOUNT], ' '.join(orderConfirmation[KEY_EXECUTIONS_STATUS]))
+    if len(response) > 0:
+      if response[KEY_ORDER_ID] <> None:
+        print '\tOrder ID {}'.format(response[KEY_ORDER_ID])
+        for orderConfirmation in response[KEY_CONFIRMATIONS]:
+          # report results of each note order
+          print '\tLoan ID {} invested ${:6,.2f} of ${:6,.2f} requested (codes: {})'.format(orderConfirmation[KEY_LOAN_ID], orderConfirmation[KEY_INVESTED_AMOUNT], orderConfirmation[KEY_REQUESTED_AMOUNT], ' '.join(orderConfirmation[KEY_EXECUTIONS_STATUS]))
+      else:
+        print '\tnothing happened (order ID "{}")'.format(response[KEY_ORDER_ID])
     else:
-      print '\tnothing happened (order ID "{}")'.format(response[KEY_ORDER_ID])
+      print '\tno order submitted'
 
   return True
 
