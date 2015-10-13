@@ -14,7 +14,7 @@ from operator import itemgetter
 # Define some global constants
 #
 
-VERSION= '0.6'
+VERSION= '0.6.1'
 MINIMUM_INVESTMENT_AMOUNT= 25
 MINIMUM_EMPLOYMENT_MONTHS= 12
 MINIMUM_DELINQUECY_MONTHS= 12
@@ -288,7 +288,7 @@ def ComposeOrder(options, request, ownedNotes, shoppingList, cash):
         if cash < options.min:
           print '\tbut cash available (${:,.2f}) remains below the cost of a single note'.format(cash)
         else:
-          print '\twill attempt to purchase {:,} up to unit{} with ${:,.2f} cash available'.format(units, PluralS(units), cash)
+          print '\twill attempt to purchase up to {:,} unit{} with ${:,.2f} cash available'.format(units, PluralS(units), cash)
       else:
         print '\tfound no suitable grade {} notes out of {:,} unfunded notes currently available'.format(grade, len(notesAvailable))
 
