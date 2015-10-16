@@ -1,5 +1,5 @@
 # lc-investor
-LendingClub API class and scripts for automatic investing and reporting
+LendingClub API class and a script for automatic investing
 
 I have not documented the API or the scripts, yet. Be cautious before you commit real money!
 - Read the code
@@ -11,3 +11,6 @@ Thanks to Jeremy Gillick and Jeremy Foote for inspiration.
 
 https://github.com/jgillick/LendingClubAutoInvestor
 https://github.com/jdfoote/LendingClubInvestor
+
+I had initially planned to create a script for detailed reporting,
+but chose instead to pull data directly into Google Spreadsheets for analysis.
