@@ -14,7 +14,7 @@ from operator import itemgetter
 # Define some global constants
 #
 
-VERSION= '1.0.0'
+VERSION= '1.0.2'
 MINIMUM_INVESTMENT_AMOUNT= 25
 MINIMUM_EMPLOYMENT_MONTHS= 12
 MINIMUM_DELINQUECY_MONTHS= 12
@@ -305,7 +305,7 @@ def ComposeOrder(options, request, ownedNotes, shoppingList, cash):
         count+= 1
         spent+= options.min
         if not options.quiet:
-          print '\tallocated ${:3.2f} to loan note {} (${:6,.2f}) remaining'.format(options.min, note[KEY_ID], cash-spent)
+          print '\tallocated ${:3.2f} to loan note {} (${:6,.2f} remaining)'.format(options.min, note[KEY_ID], cash-spent)
         if (spent + options.min) > cash or count == shoppingList[grade]:
           # ran out of money!
           break
@@ -319,8 +319,8 @@ def ComposeOrder(options, request, ownedNotes, shoppingList, cash):
           unfunded[id]-= options.min
           count+= 1
           spent+= options.min
-          if options.debug:
-            print '\tallocated ${:.2f} more to loan note {} (${:,.2f} remaining)'.format(options.min, note[KEY_ID], cash-spent)
+          if not options.quiet:
+            print '\tallocated ${:.2f} more to note {} (${:,.2f} remaining)'.format(options.min, note[KEY_ID], cash-spent)
           if (spent + options.min) > cash or count == shoppingList[grade]:
             # ran out of money!
             break
