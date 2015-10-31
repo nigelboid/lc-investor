@@ -14,13 +14,14 @@ from operator import itemgetter
 # Define some global constants
 #
 
-VERSION= '1.0.2'
+VERSION= '1.1.2'
 MINIMUM_INVESTMENT_AMOUNT= 25
 MINIMUM_EMPLOYMENT_MONTHS= 12
 MINIMUM_DELINQUECY_MONTHS= 12
 MINIMUM_RECORD_MONTHS= 36
 MINIMUM_DEROGATORY_MONTHS= 36
 MAXIMUM_DTI= 40
+MAXIMUM_UTILIZATION= 75
 GRADES= map(chr, range(ord('A'), ord('G')+1))
 PORTFOLIO_DESCRIPTION= 'Automatically created'
 
@@ -37,6 +38,7 @@ KEY_PURPOSE= 'purpose'
 KEY_EMPLOYMENT= 'empLength'
 KEY_DTI= 'dti'
 KEY_DTI_JOINT= 'dtiJoint'
+KEY_CREDIT_UTILIZATION= 'bcUtil'
 KEY_COLLECTIONS= 'collections12MthsExMed'
 KEY_SINCE_LAST_DELINQUENCY= 'mthsSinceLastDelinq'
 KEY_SINCE_LAST_RECORD= 'mthsSinceLastRecord'
@@ -81,6 +83,7 @@ def GetArguments():
   argumentParser.add_argument('--maximum-amount-per-note', nargs=1, dest='max', type=int, required=False, action='store', default=[MINIMUM_INVESTMENT_AMOUNT], help='Largest amount to invest per note')
   argumentParser.add_argument('--employment-months', nargs=1, dest='minEmploymentMonths', type=int, required=False, action='store', default=[MINIMUM_EMPLOYMENT_MONTHS], help='Minimum acceptable current employment length (in whole months)')
   argumentParser.add_argument('--dti', nargs=1, dest='maxDTI', type=int, required=False, action='store', default=[MAXIMUM_DTI], help='Maximum acceptable debt-to-income ratio')
+  argumentParser.add_argument('--utilization', nargs=1, dest='maxUtilization', type=int, required=False, action='store', default=[MAXIMUM_UTILIZATION], help='Maximum acceptable credit utilization')
   argumentParser.add_argument('--delinquency-months', nargs=1, dest='minDelinquencyMonths', type=int, required=False, action='store', default=[MINIMUM_DELINQUECY_MONTHS], help='Minimum acceptable time since last delinquency (in whole months)')
   argumentParser.add_argument('--record-months', nargs=1, dest='minRecordMonths', type=int, required=False, action='store', default=[MINIMUM_RECORD_MONTHS], help='Minimum acceptable time since last public record (in whole months)')
   argumentParser.add_argument('--derogatory-months', nargs=1, dest='minDerogatoryMonths', type=int, required=False, action='store', default=[MINIMUM_DEROGATORY_MONTHS], help='Minimum acceptable time since last major derogatory (in whole months)')
@@ -113,8 +116,10 @@ def NormalizeArguments(options):
   options.max= int(options.max.pop())
   options.minEmploymentMonths= int(options.minEmploymentMonths.pop())
   options.maxDTI= int(options.maxDTI.pop())
+  options.maxUtilization= int(options.maxUtilization.pop())
   options.minDelinquencyMonths= int(options.minDelinquencyMonths.pop())
   options.minDerogatoryMonths= int(options.minDerogatoryMonths.pop())
+  options.minRecordMonths= int(options.minRecordMonths.pop())
 
   # convert lists of single strings into strings
   options.id= str(options.id.pop())
@@ -210,7 +215,7 @@ def AssessAccount(options, request, ownedNotes, shoppingList):
           countLabel= str(shoppingList[grade])
           plurality= 's'
 
-        print '\t{:5d} grade {} notes with principal value ${:12,.2f} ({:6,.2%} / {:3,.0%}) [{:>3} unit{} to buy]'.format(count[grade], grade, principal[grade], invested, options.allocations[grade], countLabel, plurality)
+        print '\t{:5d} grade {} notes with principal value ${:12,.2f} ({:6,.2%} / {:4,.0%}) [{:>4} unit{} to buy]'.format(count[grade], grade, principal[grade], invested, options.allocations[grade], countLabel, plurality)
 
     if options.portfolio <> None:
       # check if our target portfolio exists and create it if not
@@ -305,7 +310,7 @@ def ComposeOrder(options, request, ownedNotes, shoppingList, cash):
         count+= 1
         spent+= options.min
         if not options.quiet:
-          print '\tallocated ${:3.2f} to loan note {} (${:6,.2f} remaining)'.format(options.min, note[KEY_ID], cash-spent)
+          print '\tallocated ${:3.2f} to note {} (${:6,.2f} remaining)'.format(options.min, note[KEY_ID], cash-spent)
         if (spent + options.min) > cash or count == shoppingList[grade]:
           # ran out of money!
           break
@@ -320,7 +325,7 @@ def ComposeOrder(options, request, ownedNotes, shoppingList, cash):
           count+= 1
           spent+= options.min
           if not options.quiet:
-            print '\tallocated ${:.2f} more to note {} (${:,.2f} remaining)'.format(options.min, note[KEY_ID], cash-spent)
+            print '\tallocated ${:.2f} more to note {} (${:,.2f} remaining)'.format(options.min, id, cash-spent)
           if (spent + options.min) > cash or count == shoppingList[grade]:
             # ran out of money!
             break
@@ -329,7 +334,7 @@ def ComposeOrder(options, request, ownedNotes, shoppingList, cash):
 
     if options.debug:
       if count < shoppingList[grade]:
-        if cash > spent:
+        if cash > spent and cash > options.min:
           print '\tfailed to find enough unfunded matching notes to allocate planned funds ({} note{} short)'.format(shoppingList[grade]-count, PluralS(shoppingList[grade]-count))
         else:
           print '\tfailed to fund all desired unfunded notes due to insufficient available cash ({} note{} short)'.format(shoppingList[grade]-count, PluralS(shoppingList[grade]-count))
@@ -380,6 +385,7 @@ def FilterNotesByPreference(options, ownedNotes, notes, desiredGrades):
     and note[KEY_EMPLOYMENT] >= options.minEmploymentMonths
     and note[KEY_DTI] <= options.maxDTI
     and note[KEY_DTI_JOINT] <= options.maxDTI
+    and note[KEY_CREDIT_UTILIZATION] <= options.maxUtilization
     and note[KEY_COLLECTIONS] == 0
     and note[KEY_TAX_LIEN] == 0
     and (note[KEY_SINCE_LAST_DELINQUENCY] == None or note[KEY_SINCE_LAST_DELINQUENCY] >= options.minDelinquencyMonths)
