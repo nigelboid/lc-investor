@@ -14,7 +14,7 @@ from operator import itemgetter
 # Define some global constants
 #
 
-VERSION= '1.1.2'
+VERSION= '1.1.3'
 MINIMUM_INVESTMENT_AMOUNT= 25
 MINIMUM_EMPLOYMENT_MONTHS= 12
 MINIMUM_DELINQUECY_MONTHS= 12
@@ -157,7 +157,7 @@ def NormalizeArguments(options):
 
 # Assess current account state and identify what to buy
 #
-def AssessAccount(options, request, ownedNotes, shoppingList):
+def AssessAccount(options, request, ownedLoans, shoppingList):
 
   # check our account
   summary= request.get_account_summary()
@@ -187,6 +187,7 @@ def AssessAccount(options, request, ownedNotes, shoppingList):
     for note in ownedNotes:
       # calculate principal and count of notes for each major grade
       grade= note[KEY_GRADE][0]
+      ownedLoans.append(note[KEY_LOAN_ID])
       count[grade]+= 1
       principal[grade]+= note[KEY_PRINCIPAL]
 
@@ -253,9 +254,9 @@ def AssessAccount(options, request, ownedNotes, shoppingList):
 
 # Find and buy notes to meet desired allocation targets
 #
-def BuyNotes(options, request, ownedNotes, shoppingList, cash):
+def BuyNotes(options, request, ownedLoans, shoppingList, cash):
   # compose our order and submit it
-  result= SubmitOrder(options, request, ComposeOrder(options, request, ownedNotes, shoppingList, cash))
+  result= SubmitOrder(options, request, ComposeOrder(options, request, ownedLoans, shoppingList, cash))
 
   return result
 
@@ -263,19 +264,19 @@ def BuyNotes(options, request, ownedNotes, shoppingList, cash):
 
 # Compose a buy order for desired notes
 #
-def ComposeOrder(options, request, ownedNotes, shoppingList, cash):
+def ComposeOrder(options, request, ownedLoans, shoppingList, cash):
   # prioritize orders by rate or by deficit (i.e., most wanted)
   notesAvailable= request.get_available_notes()
   if options.chaseYield:
     # sort the shopping list by highest grade, in descending order
     # also, sort filtered available loans by highest rate, in descending order
     shoppingOrder= sorted(shoppingList, reverse=True)
-    notesDesired= sorted(FilterNotesByPreference(options, ownedNotes, notesAvailable, shoppingOrder), key=itemgetter(KEY_RATE), reverse=True)
+    notesDesired= sorted(FilterNotesByPreference(options, ownedLoans, notesAvailable, shoppingOrder), key=itemgetter(KEY_RATE), reverse=True)
   else:
     # sort the shopping list by highest relative deficit (i.e., most notes to buy), in descending order
     # also, just filter available loans preserving their original order
     shoppingOrder= sorted(shoppingList, key=shoppingList.get, reverse=True)
-    notesDesired= FilterNotesByPreference(options, ownedNotes, notesAvailable, shoppingOrder)
+    notesDesired= FilterNotesByPreference(options, ownedLoans, notesAvailable, shoppingOrder)
 
   # collect our orders
   orders= {}
@@ -375,10 +376,10 @@ def FilterNotesByGrade(notes, grade):
 
 # Filter offered notes by various preferred criteria
 #
-def FilterNotesByPreference(options, ownedNotes, notes, desiredGrades):
+def FilterNotesByPreference(options, ownedLoans, notes, desiredGrades):
   notesDesired= [note for note in notes if
   (
-    note[KEY_ID] not in ownedNotes
+    note[KEY_ID] not in ownedLoans
     and note[KEY_GRADE] in desiredGrades
     and note[KEY_PURPOSE] in ACCEPTABLE_PURPOSES
     and note[KEY_HOME] in ACCEPTABLE_HOME
@@ -457,14 +458,14 @@ def main():
     request= LCRequest(options)
 
     # figure out what we want
-    ownedNotes= ()
+    ownedLoans= []
     shoppingList= {}
-    cash= AssessAccount(options, request, ownedNotes, shoppingList)
+    cash= AssessAccount(options, request, ownedLoans, shoppingList)
 
     if len(shoppingList) > 0 or options.debug:
       # attempt to buy notes or just go through the motions for the sake of debugging
       # deliver a report on the outcome
-      Report(options, BuyNotes(options, request, ownedNotes, shoppingList, cash))
+      Report(options, BuyNotes(options, request, ownedLoans, shoppingList, cash))
 
   except Exception as error:
     print type(error)
