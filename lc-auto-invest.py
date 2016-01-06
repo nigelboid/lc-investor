@@ -14,7 +14,7 @@ from operator import itemgetter
 # Define some global constants
 #
 
-VERSION= '1.1.3'
+VERSION= '1.2.1'
 MINIMUM_INVESTMENT_AMOUNT= 25
 MINIMUM_EMPLOYMENT_MONTHS= 12
 MINIMUM_DELINQUECY_MONTHS= 12
@@ -24,6 +24,11 @@ MAXIMUM_DTI= 40
 MAXIMUM_UTILIZATION= 75
 GRADES= map(chr, range(ord('A'), ord('G')+1))
 PORTFOLIO_DESCRIPTION= 'Automatically created'
+
+KEY_CASH= 'cash'
+KEY_INVESTED_LOANS= 'investedLoans'
+KEY_SHOPPING_LIST= 'shoppingList'
+
 
 # Lending Club API data structure keys
 KEY_AVAILABLE_CASH= 'availableCash'
@@ -91,7 +96,6 @@ def GetArguments():
   argumentParser.add_argument('--chase-yield', dest='chaseYield', required=False, action='store_true', default=False, help='Prefer higher yielding notes within a grade')
   argumentParser.add_argument('--eat-cash', dest='eatCash', required=False, action='store_true', default=False, help='Aggressively attempt to overbuy to use up any and all cash')
 
-
   argumentParser.add_argument('-n', '--simulation', dest='simulation', required=False, action='store_true', default=False, help='Take no action -- only report decisions')
   argumentParser.add_argument('-q', '--quiet', dest='quiet', required=False, action='store_true', default=False, help='Suppress non-critical messages')
   argumentParser.add_argument('-d', '--debug', dest='debug', required=False, action='store_true', default=False, help='Turn on verbose diagnostics')
@@ -157,17 +161,18 @@ def NormalizeArguments(options):
 
 # Assess current account state and identify what to buy
 #
-def AssessAccount(options, request, ownedLoans, shoppingList):
+def AssessAccount(options, request):
 
   # check our account
   summary= request.get_account_summary()
   cash= summary[KEY_AVAILABLE_CASH]
   total= summary[KEY_ACCOUNT_TOTAL]
+  investedLoans= []
+  shoppingList= {}
 
-  if cash >= options.min or options.debug:
+  if cash >= options.min:
     # we seem to have enough for at least one note
     # let's figure out allocations
-    # (or just go through the motions for the sake of debugging)
     ownedNotes= request.get_owned_notes()
     principal= {}
     count= {}
@@ -187,7 +192,7 @@ def AssessAccount(options, request, ownedLoans, shoppingList):
     for note in ownedNotes:
       # calculate principal and count of notes for each major grade
       grade= note[KEY_GRADE][0]
-      ownedLoans.append(note[KEY_LOAN_ID])
+      investedLoans.append(note[KEY_LOAN_ID])
       count[grade]+= 1
       principal[grade]+= note[KEY_PRINCIPAL]
 
@@ -248,15 +253,15 @@ def AssessAccount(options, request, ownedLoans, shoppingList):
     if options.debug:
       print '\nNot enough cash to proceed (${:,.2f} available)'.format(cash)
 
-  return cash
+  return {KEY_CASH: cash, KEY_INVESTED_LOANS: investedLoans, KEY_SHOPPING_LIST: shoppingList}
 
 
 
 # Find and buy notes to meet desired allocation targets
 #
-def BuyNotes(options, request, ownedLoans, shoppingList, cash):
+def BuyNotes(options, request, account):
   # compose our order and submit it
-  result= SubmitOrder(options, request, ComposeOrder(options, request, ownedLoans, shoppingList, cash))
+  result= SubmitOrder(options, request, ComposeOrder(options, request, account))
 
   return result
 
@@ -264,21 +269,23 @@ def BuyNotes(options, request, ownedLoans, shoppingList, cash):
 
 # Compose a buy order for desired notes
 #
-def ComposeOrder(options, request, ownedLoans, shoppingList, cash):
+def ComposeOrder(options, request, account):
   # prioritize orders by rate or by deficit (i.e., most wanted)
   notesAvailable= request.get_available_notes()
+  shoppingList= account[KEY_SHOPPING_LIST]
   if options.chaseYield:
     # sort the shopping list by highest grade, in descending order
     # also, sort filtered available loans by highest rate, in descending order
     shoppingOrder= sorted(shoppingList, reverse=True)
-    notesDesired= sorted(FilterNotesByPreference(options, ownedLoans, notesAvailable, shoppingOrder), key=itemgetter(KEY_RATE), reverse=True)
+    notesDesired= sorted(FilterNotesByPreference(options, account[KEY_INVESTED_LOANS], notesAvailable, shoppingOrder), key=itemgetter(KEY_RATE), reverse=True)
   else:
     # sort the shopping list by highest relative deficit (i.e., most notes to buy), in descending order
     # also, just filter available loans preserving their original order
     shoppingOrder= sorted(shoppingList, key=shoppingList.get, reverse=True)
-    notesDesired= FilterNotesByPreference(options, ownedLoans, notesAvailable, shoppingOrder)
+    notesDesired= FilterNotesByPreference(options, account[KEY_INVESTED_LOANS], notesAvailable, shoppingOrder)
 
   # collect our orders
+  cash= account[KEY_CASH]
   orders= {}
   for grade in shoppingOrder:
     # attempt to find and purchase notes for each grade in our shopping list
@@ -311,7 +318,7 @@ def ComposeOrder(options, request, ownedLoans, shoppingList, cash):
         count+= 1
         spent+= options.min
         if not options.quiet:
-          print '\tallocated ${:3.2f} to note {} (${:6,.2f} remaining)'.format(options.min, note[KEY_ID], cash-spent)
+          print '\tallocated ${:3.2f} to note {} (${:,.2f} remaining)'.format(options.min, note[KEY_ID], cash-spent)
         if (spent + options.min) > cash or count == shoppingList[grade]:
           # ran out of money!
           break
@@ -458,14 +465,12 @@ def main():
     request= LCRequest(options)
 
     # figure out what we want
-    ownedLoans= []
-    shoppingList= {}
-    cash= AssessAccount(options, request, ownedLoans, shoppingList)
+    account= AssessAccount(options, request)
 
-    if len(shoppingList) > 0 or options.debug:
+    if len(account[KEY_SHOPPING_LIST]) > 0 or options.debug:
       # attempt to buy notes or just go through the motions for the sake of debugging
       # deliver a report on the outcome
-      Report(options, BuyNotes(options, request, ownedLoans, shoppingList, cash))
+      Report(options, BuyNotes(options, request, account))
 
   except Exception as error:
     print type(error)
