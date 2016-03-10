@@ -12,7 +12,7 @@ import requests
 # API request building blocks
 API_VERSION= 'v1'
 REQUEST_ROOT= 'https://api.lendingclub.com/api/investor/{}/'.format(API_VERSION)
-REQUEST_LOANS= 'loans/listing'
+REQUEST_LOANS= 'loans/listing?showAll=true'
 REQUEST_ACCOUNTS= 'accounts/{}/'
 REQUEST_SUMMARY= 'summary'
 REQUEST_NOTES= 'detailednotes'
@@ -73,7 +73,13 @@ class LCRequest:
     result= requests.get(request, headers=self.requestHeader)
 
     if result.status_code == STATUS_CODE_OK:
-      return result.json()[KEY_LOANS]
+      if KEY_LOANS in result.json():
+        return result.json()[KEY_LOANS]
+      else:
+        if self.debug:
+          raise Exception('Received an empty response for available loans (result object {})'.format(result.json()), self, request, self.requestHeader)
+        else:
+          raise Exception('Received an empty response for available loans')
     else:
       if self.debug:
         raise Exception('Could not obtain a list of available loans (status code {})'.format(result.status_code), self, request, self.requestHeader)
