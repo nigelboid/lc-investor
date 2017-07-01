@@ -17,7 +17,7 @@ from operator import itemgetter
 VERSION= '1.2.1'
 MINIMUM_INVESTMENT_AMOUNT= 25
 MINIMUM_EMPLOYMENT_MONTHS= 12
-MINIMUM_DELINQUECY_MONTHS= 12
+MINIMUM_DELINQUENCY_MONTHS= 12
 MINIMUM_RECORD_MONTHS= 36
 MINIMUM_DEROGATORY_MONTHS= 36
 MAXIMUM_DTI= 40
@@ -89,7 +89,7 @@ def GetArguments():
   argumentParser.add_argument('--employment-months', nargs=1, dest='minEmploymentMonths', type=int, required=False, action='store', default=[MINIMUM_EMPLOYMENT_MONTHS], help='Minimum acceptable current employment length (in whole months)')
   argumentParser.add_argument('--dti', nargs=1, dest='maxDTI', type=int, required=False, action='store', default=[MAXIMUM_DTI], help='Maximum acceptable debt-to-income ratio')
   argumentParser.add_argument('--utilization', nargs=1, dest='maxUtilization', type=int, required=False, action='store', default=[MAXIMUM_UTILIZATION], help='Maximum acceptable credit utilization')
-  argumentParser.add_argument('--delinquency-months', nargs=1, dest='minDelinquencyMonths', type=int, required=False, action='store', default=[MINIMUM_DELINQUECY_MONTHS], help='Minimum acceptable time since last delinquency (in whole months)')
+  argumentParser.add_argument('--delinquency-months', nargs=1, dest='minDelinquencyMonths', type=int, required=False, action='store', default=[MINIMUM_DELINQUENCY_MONTHS], help='Minimum acceptable time since last delinquency (in whole months)')
   argumentParser.add_argument('--record-months', nargs=1, dest='minRecordMonths', type=int, required=False, action='store', default=[MINIMUM_RECORD_MONTHS], help='Minimum acceptable time since last public record (in whole months)')
   argumentParser.add_argument('--derogatory-months', nargs=1, dest='minDerogatoryMonths', type=int, required=False, action='store', default=[MINIMUM_DEROGATORY_MONTHS], help='Minimum acceptable time since last major derogatory (in whole months)')
 
