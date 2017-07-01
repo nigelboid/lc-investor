@@ -6,7 +6,7 @@
 #
 
 import argparse
-from LendingClubAPI import LCRequest
+from lcrequest import LCRequest
 from operator import itemgetter
 
 

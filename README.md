@@ -1,9 +1,9 @@
 # lc-investor
-LendingClub API class and a script for automatic investing
+LCRequest class and scripts for automatic investing, withdrawals, and reports
 
 I have not documented the API or the scripts, yet. Be cautious before you commit real money!
-- Read the code
-- Read the LendingClub API documentation
+- Read the example scripts
+- Read the LCRequest code
 - Run the code in --simulation and --debug modes
 - Obtain an API key from LendingClub and note your account number (investor ID)
 
