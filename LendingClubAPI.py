@@ -9,6 +9,8 @@ import requests
 # Define some global constants
 #
 
+VERSION= '1.0.0'
+
 # API request building blocks
 API_VERSION= 'v1'
 REQUEST_ROOT= 'https://api.lendingclub.com/api/investor/{}/'.format(API_VERSION)
@@ -17,6 +19,7 @@ REQUEST_ACCOUNTS= 'accounts/{}/'
 REQUEST_SUMMARY= 'summary'
 REQUEST_NOTES= 'detailednotes'
 REQUEST_PORTFOLIOS= 'portfolios'
+REQUEST_WITHDRAWAL= 'funds/withdraw'
 REQUEST_HEADER= 'Authorization'
 REQUEST_ORDERS= 'orders'
 
@@ -31,6 +34,7 @@ KEY_ERRORS= 'errors'
 KEY_LOANS= 'loans'
 KEY_NOTES= 'myNotes'
 KEY_PORTFOLIOS= 'myPortfolios'
+KEY_AMOUNT= 'amount'
 
 
 # API request result codes
@@ -134,6 +138,20 @@ class LCRequest:
   def submit_order(self, notes):
     request= self.requestAccounts + REQUEST_ORDERS
     payload= {KEY_AID:self.id, KEY_ORDERS:notes}
+    result= requests.post(request, json=payload, headers=self.requestHeader)
+
+    if result.status_code == STATUS_CODE_OK:
+      return result.json()
+    else:
+      if self.debug:
+        raise Exception('Order failed (status code {})'.format(result.status_code), self, request, self.requestHeader, result.json())
+      else:
+        raise Exception('Order failed (status code {})'.format(result.status_code))
+
+  # Submit withdrawal request
+  def submit_withdrawal(self, amount):
+    request= self.requestAccounts + REQUEST_WITHDRAWAL
+    payload= {KEY_AID:self.id, KEY_AMOUNT:amount}
     result= requests.post(request, json=payload, headers=self.requestHeader)
 
     if result.status_code == STATUS_CODE_OK:
