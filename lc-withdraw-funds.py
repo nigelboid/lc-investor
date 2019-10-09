@@ -14,7 +14,7 @@ from operator import itemgetter
 # Define some global constants
 #
 
-VERSION= '0.0.1'
+VERSION= '0.0.2'
 MINIMUM_WITHDRAWAL_AMOUNT= 100
 MAXIMUM_WITHDRAWAL_AMOUNT= 1000
 
@@ -82,8 +82,8 @@ def Withdraw(options, request):
     # (or just go through the motions for the sake of debugging)
 
     if not options.quiet:
-      print
-      print '      Cash balance: ${:12,.2f}'.format(cash)
+      print()
+      print('      Cash balance: ${:12,.2f}'.format(cash))
 
     if cash <= options.max:
       amount= cash
@@ -91,21 +91,21 @@ def Withdraw(options, request):
       amount= options.max
 
     if not options.quiet:
-      print ' Withdrawal amount: ${:12,.2f}'.format(amount)
+      print(' Withdrawal amount: ${:12,.2f}'.format(amount))
 
     response= request.submit_withdrawal(amount)
 
     if not options.quiet:
-      print
+      print()
       if len(response) > 0:
-        print 'Request to withdraw ${:6,.2f} set for {}'.format(response[KEY_AMOUNT], response[KEY_TRANSFER_DATE])
+        print('Request to withdraw ${:6,.2f} set for {}'.format(response[KEY_AMOUNT], response[KEY_TRANSFER_DATE]))
       else:
-        print '\tno request submitted'
+        print('\tno request submitted')
 
   else:
     # we don't have enough cash to proceed
     if options.debug:
-      print '\nNot enough cash to proceed (${:,.2f} available)'.format(cash)
+      print('\nNot enough cash to proceed (${:,.2f} available)'.format(cash))
 
   return cash
 
@@ -131,15 +131,15 @@ def main():
     cash= Withdraw(options, request)
 
   except Exception as error:
-    print type(error)
-    print error.args[0]
-    for counter in xrange(1, len(error.args)):
-      print '\t' + str(error.args[counter])
+    print(type(error))
+    print(error.args[0])
+    for counter in range(1, len(error.args)):
+      print('\t' + str(error.args[counter]))
 
   else:
     if options.debug:
-      print
-      print 'All done!'
+      print()
+      print('All done!')
 
 
 #

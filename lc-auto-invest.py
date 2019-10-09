@@ -14,7 +14,7 @@ from operator import itemgetter
 # Define some global constants
 #
 
-VERSION= '1.2.1'
+VERSION= '1.2.2'
 MINIMUM_INVESTMENT_AMOUNT= 25
 MINIMUM_EMPLOYMENT_MONTHS= 12
 MINIMUM_DELINQUENCY_MONTHS= 12
@@ -144,9 +144,9 @@ def NormalizeArguments(options):
           allocations[grade]+= float(specification[1]) / 100
           allocated+= int(specification[1])
         elif options.debug:
-          print '\n*** Ignoring percent specification <{}> for grade {} as it is not an integer value\n'.format(specification[1], grade)
+          print('\n*** Ignoring percent specification <{}> for grade {} as it is not an integer value\n'.format(specification[1], grade))
       elif options.debug:
-        print '\n*** Ignoring grade specification "{}" as it is not an expected major grade label [A-G]\n'.format(specification[0])
+        print('\n*** Ignoring grade specification "{}" as it is not an expected major grade label [A-G]\n'.format(specification[0]))
 
   if allocated > 100:
     # over-allocated!
@@ -178,10 +178,10 @@ def AssessAccount(options, request):
     count= {}
 
     if not options.quiet:
-      print
-      print ' Cash balance: ${:12,.2f}'.format(cash)
-      print 'Account total: ${:12,.2f}\n'.format(total)
-      print 'My notes: {:,}'.format(len(ownedNotes))
+      print()
+      print(' Cash balance: ${:12,.2f}'.format(cash))
+      print('Account total: ${:12,.2f}\n'.format(total))
+      print('My notes: {:,}'.format(len(ownedNotes)))
 
     for grade in GRADES:
       # initialize our aggregator arrays
@@ -221,7 +221,7 @@ def AssessAccount(options, request):
           countLabel= str(shoppingList[grade])
           plurality= 's'
 
-        print '\t{:5d} grade {} notes with principal value ${:12,.2f} ({:6,.2%} / {:4,.0%}) [{:>4} unit{} to buy]'.format(count[grade], grade, principal[grade], invested, options.allocations[grade], countLabel, plurality)
+        print('\t{:5d} grade {} notes with principal value ${:12,.2f} ({:6,.2%} / {:4,.0%}) [{:>4} unit{} to buy]'.format(count[grade], grade, principal[grade], invested, options.allocations[grade], countLabel, plurality))
 
     if options.portfolio <> None:
       # check if our target portfolio exists and create it if not
@@ -234,24 +234,24 @@ def AssessAccount(options, request):
       ]
       if len(matchedPortfolio) > 0:
         if options.debug:
-          print '\nFound existing target portfolio "{}" with ID "{}"'.format(options.portfolio, matchedPortfolio[0])
+          print('\nFound existing target portfolio "{}" with ID "{}"'.format(options.portfolio, matchedPortfolio[0]))
         options.portfolio= matchedPortfolio[0]
       else:
         if options.simulation:
-          print '\nSpecified target portfolio "{}" does not exist:'.format(options.portfolio)
-          print '\twould have tried to create a portfolio named "{}"\n\tand description "{}"\n\tif this was not a simulated run'.format(options.portfolio, PORTFOLIO_DESCRIPTION)
+          print('\nSpecified target portfolio "{}" does not exist:'.format(options.portfolio))
+          print('\twould have tried to create a portfolio named "{}"\n\tand description "{}"\n\tif this was not a simulated run'.format(options.portfolio, PORTFOLIO_DESCRIPTION))
           options.portfolio= '123456'
         else:
           response= request.create_portfolio(options.portfolio, PORTFOLIO_DESCRIPTION)
           if not options.quiet:
-            print '\nSpecified target portfolio "{}" does not exist:'.format(options.portfolio)
-            print '\tcreated target portfolio named "{}"\n\twith ID "{}"\n\tand description "{}"'.format(response[KEY_PORTFOLIO_NAME], response[KEY_PORTFOLIO_ID], response[KEY_PORTFOLIO_DESCRIPTION])
+            print('\nSpecified target portfolio "{}" does not exist:'.format(options.portfolio))
+            print('\tcreated target portfolio named "{}"\n\twith ID "{}"\n\tand description "{}"'.format(response[KEY_PORTFOLIO_NAME], response[KEY_PORTFOLIO_ID], response[KEY_PORTFOLIO_DESCRIPTION]))
             options.portfolio= response[KEY_PORTFOLIO_ID]
 
   else:
     # we don't have enough cash to proceed
     if options.debug:
-      print '\nNot enough cash to proceed (${:,.2f} available)'.format(cash)
+      print('\nNot enough cash to proceed (${:,.2f} available)'.format(cash))
 
   return {KEY_CASH: cash, KEY_INVESTED_LOANS: investedLoans, KEY_SHOPPING_LIST: shoppingList}
 
@@ -290,20 +290,20 @@ def ComposeOrder(options, request, account):
   for grade in shoppingOrder:
     # attempt to find and purchase notes for each grade in our shopping list
     if not options.quiet:
-      print
-      print 'Allocating available cash to grade {} notes:'.format(grade)
+      print()
+      print('Allocating available cash to grade {} notes:'.format(grade))
 
     notes= FilterNotesByGrade(notesDesired, grade)
     if not options.quiet:
       if len(notes) > 0:
         units= int(min(cash/options.min, shoppingList[grade]))
-        print '\tfound {:,} suitable grade {} note{} out of {:,} unfunded notes currently available'.format(len(notes), grade, PluralS(len(notes)), len(notesAvailable))
+        print('\tfound {:,} suitable grade {} note{} out of {:,} unfunded notes currently available'.format(len(notes), grade, PluralS(len(notes)), len(notesAvailable)))
         if cash < options.min:
-          print '\tbut cash available (${:,.2f}) remains below the cost of a single note'.format(cash)
+          print('\tbut cash available (${:,.2f}) remains below the cost of a single note'.format(cash))
         else:
-          print '\twill attempt to purchase up to {:,} unit{} with ${:,.2f} cash available'.format(units, PluralS(units), cash)
+          print('\twill attempt to purchase up to {:,} unit{} with ${:,.2f} cash available'.format(units, PluralS(units), cash))
       else:
-        print '\tfound no suitable grade {} notes out of {:,} unfunded notes currently available'.format(grade, len(notesAvailable))
+        print('\tfound no suitable grade {} notes out of {:,} unfunded notes currently available'.format(grade, len(notesAvailable)))
 
     # collect candidate notes and desired amounts
     count= 0
@@ -318,7 +318,7 @@ def ComposeOrder(options, request, account):
         count+= 1
         spent+= options.min
         if not options.quiet:
-          print '\tallocated ${:3.2f} to note {} (${:,.2f} remaining)'.format(options.min, note[KEY_ID], cash-spent)
+          print('\tallocated ${:3.2f} to note {} (${:,.2f} remaining)'.format(options.min, note[KEY_ID], cash-spent))
         if (spent + options.min) > cash or count == shoppingList[grade]:
           # ran out of money!
           break
@@ -333,7 +333,7 @@ def ComposeOrder(options, request, account):
           count+= 1
           spent+= options.min
           if not options.quiet:
-            print '\tallocated ${:.2f} more to note {} (${:,.2f} remaining)'.format(options.min, id, cash-spent)
+            print('\tallocated ${:.2f} more to note {} (${:,.2f} remaining)'.format(options.min, id, cash-spent))
           if (spent + options.min) > cash or count == shoppingList[grade]:
             # ran out of money!
             break
@@ -343,16 +343,16 @@ def ComposeOrder(options, request, account):
     if options.debug:
       if count < shoppingList[grade]:
         if cash > spent and cash > options.min:
-          print '\tfailed to find enough unfunded matching notes to allocate planned funds ({} note{} short)'.format(shoppingList[grade]-count, PluralS(shoppingList[grade]-count))
+          print('\tfailed to find enough unfunded matching notes to allocate planned funds ({} note{} short)'.format(shoppingList[grade]-count, PluralS(shoppingList[grade]-count)))
         else:
-          print '\tfailed to fund all desired unfunded notes due to insufficient available cash ({} note{} short)'.format(shoppingList[grade]-count, PluralS(shoppingList[grade]-count))
+          print('\tfailed to fund all desired unfunded notes due to insufficient available cash ({} note{} short)'.format(shoppingList[grade]-count, PluralS(shoppingList[grade]-count)))
 
     cash-= spent
 
   # itemize our buy order
   if options.debug:
-      print
-      print 'Composing order:'
+      print()
+      print('Composing order:')
 
   buyList= []
   if len(orders) > 0:
@@ -362,10 +362,10 @@ def ComposeOrder(options, request, account):
       else:
         buyList.append({KEY_LOAN_ID:id, KEY_REQUESTED_AMOUNT:orders[id]})
       if options.debug:
-        print '\twill attempt to order ${:,.2f} worth of note {}'.format(orders[id], id)
+        print('\twill attempt to order ${:,.2f} worth of note {}'.format(orders[id], id))
   else:
     if options.debug:
-      print '\tnothing to order'
+      print('\tnothing to order')
 
   return buyList
 
@@ -410,19 +410,19 @@ def SubmitOrder(options, request, buyList):
   response= {}
 
   if options.debug:
-    print '\nSubmitting order:'
+    print('\nSubmitting order:')
 
   if len(buyList) > 0 or options.debug:
     if options.simulation:
-      print '\nSubmitting order:'
-      print '\twould have tried to submit the order if this was not a simulated run'
+      print('\nSubmitting order:')
+      print('\twould have tried to submit the order if this was not a simulated run')
     else:
       response= request.submit_order(buyList)
       if len(buyList) > 0:
         if options.debug:
-          print '\tsubmitted order'
+          print('\tsubmitted order')
       else:
-        print '\tsubmitted empty order'
+        print('\tsubmitted empty order')
 
   return response
 
@@ -431,18 +431,18 @@ def SubmitOrder(options, request, buyList):
 #
 def Report(options, response):
   if not options.quiet:
-    print
-    print 'Order execution report:'
+    print()
+    print('Order execution report:')
     if len(response) > 0:
       if response[KEY_ORDER_ID] <> None:
-        print '\tOrder ID {}'.format(response[KEY_ORDER_ID])
+        print('\tOrder ID {}'.format(response[KEY_ORDER_ID]))
         for orderConfirmation in response[KEY_CONFIRMATIONS]:
           # report results of each note order
-          print '\tLoan ID {} invested ${:6,.2f} of ${:6,.2f} requested (codes: {})'.format(orderConfirmation[KEY_LOAN_ID], orderConfirmation[KEY_INVESTED_AMOUNT], orderConfirmation[KEY_REQUESTED_AMOUNT], ' '.join(orderConfirmation[KEY_EXECUTIONS_STATUS]))
+          print('\tLoan ID {} invested ${:6,.2f} of ${:6,.2f} requested (codes: {})'.format(orderConfirmation[KEY_LOAN_ID], orderConfirmation[KEY_INVESTED_AMOUNT], orderConfirmation[KEY_REQUESTED_AMOUNT], ' '.join(orderConfirmation[KEY_EXECUTIONS_STATUS])))
       else:
-        print '\tnothing happened (order ID "{}")'.format(response[KEY_ORDER_ID])
+        print('\tnothing happened (order ID "{}")'.format(response[KEY_ORDER_ID]))
     else:
-      print '\tno order submitted'
+      print('\tno order submitted')
 
   return True
 
@@ -473,15 +473,15 @@ def main():
       Report(options, BuyNotes(options, request, account))
 
   except Exception as error:
-    print type(error)
-    print error.args[0]
-    for counter in xrange(1, len(error.args)):
-      print '\t' + str(error.args[counter])
+    print(type(error))
+    print(error.args[0])
+    for counter in range(1, len(error.args)):
+      print('\t' + str(error.args[counter]))
 
   else:
     if options.debug:
-      print
-      print 'All done!'
+      print()
+      print('All done!')
 
 
 #
