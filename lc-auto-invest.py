@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 
 #
@@ -14,7 +14,7 @@ from operator import itemgetter
 # Define some global constants
 #
 
-VERSION= '1.2.2'
+VERSION= '1.2.3'
 MINIMUM_INVESTMENT_AMOUNT= 25
 MINIMUM_EMPLOYMENT_MONTHS= 12
 MINIMUM_DELINQUENCY_MONTHS= 12
@@ -178,7 +178,7 @@ def AssessAccount(options, request):
     count= {}
 
     if not options.quiet:
-      print()
+      print('')
       print(' Cash balance: ${:12,.2f}'.format(cash))
       print('Account total: ${:12,.2f}\n'.format(total))
       print('My notes: {:,}'.format(len(ownedNotes)))
@@ -290,7 +290,7 @@ def ComposeOrder(options, request, account):
   for grade in shoppingOrder:
     # attempt to find and purchase notes for each grade in our shopping list
     if not options.quiet:
-      print()
+      print('')
       print('Allocating available cash to grade {} notes:'.format(grade))
 
     notes= FilterNotesByGrade(notesDesired, grade)
@@ -351,7 +351,7 @@ def ComposeOrder(options, request, account):
 
   # itemize our buy order
   if options.debug:
-      print()
+      print('')
       print('Composing order:')
 
   buyList= []
@@ -431,7 +431,7 @@ def SubmitOrder(options, request, buyList):
 #
 def Report(options, response):
   if not options.quiet:
-    print()
+    print('')
     print('Order execution report:')
     if len(response) > 0:
       if response[KEY_ORDER_ID] <> None:
@@ -480,7 +480,7 @@ def main():
 
   else:
     if options.debug:
-      print()
+      print('')
       print('All done!')
 
 

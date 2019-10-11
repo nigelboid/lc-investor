@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 
 #
@@ -14,7 +14,7 @@ from operator import itemgetter
 # Define some global constants
 #
 
-VERSION= '0.0.2'
+VERSION= '0.0.3'
 MINIMUM_WITHDRAWAL_AMOUNT= 100
 MAXIMUM_WITHDRAWAL_AMOUNT= 1000
 
@@ -82,7 +82,7 @@ def Withdraw(options, request):
     # (or just go through the motions for the sake of debugging)
 
     if not options.quiet:
-      print()
+      print('')
       print('      Cash balance: ${:12,.2f}'.format(cash))
 
     if cash <= options.max:
@@ -96,7 +96,7 @@ def Withdraw(options, request):
     response= request.submit_withdrawal(amount)
 
     if not options.quiet:
-      print()
+      print('')
       if len(response) > 0:
         print('Request to withdraw ${:6,.2f} set for {}'.format(response[KEY_AMOUNT], response[KEY_TRANSFER_DATE]))
       else:
@@ -138,7 +138,7 @@ def main():
 
   else:
     if options.debug:
-      print()
+      print('')
       print('All done!')
 
 

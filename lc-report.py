@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 
 #
@@ -76,18 +76,18 @@ def GetSummary(options, request):
   # check our account
   summary= request.get_account_summary()
 
-  print
-  print 'Summary'
-  print '---------------------------------'
-  print '{:>18}: ${:12,.2f}'.format('Account total', summary[KEY_ACCOUNT_TOTAL])
-  print '{:>18}: ${:12,.2f}'.format('Cash balance', summary[KEY_ACCOUNT_CASH])
-  print '{:>18}: ${:12,.2f}'.format('Committed cash', summary[KEY_IN_FUNDING])
-  print '{:>18}: ${:12,.2f}'.format('Current principal', summary[KEY_PRINCIPAL_OUTSTANDING])
-  print '{:>18}: ${:12,.2f}'.format('Capital returned', summary[KEY_PRINCIPAL_RECEIVED])
-  print '{:>18}: ${:12,.2f}'.format('Interest received', summary[KEY_INTEREST_RECEIVED])
-  print '{:>18}: ${:12,.2f}'.format('Fees received', summary[KEY_FEES_RECEIVED])
-  print
-  print '{:>18}: {:13,}'.format('Notes owned', summary[KEY_NOTES_COUNT])
+  print('')
+  print('Summary')
+  print('---------------------------------')
+  print('{:>18}: ${:12,.2f}'.format('Account total', summary[KEY_ACCOUNT_TOTAL]))
+  print('{:>18}: ${:12,.2f}'.format('Cash balance', summary[KEY_ACCOUNT_CASH]))
+  print('{:>18}: ${:12,.2f}'.format('Committed cash', summary[KEY_IN_FUNDING]))
+  print('{:>18}: ${:12,.2f}'.format('Current principal', summary[KEY_PRINCIPAL_OUTSTANDING]))
+  print('{:>18}: ${:12,.2f}'.format('Capital returned', summary[KEY_PRINCIPAL_RECEIVED]))
+  print('{:>18}: ${:12,.2f}'.format('Interest received', summary[KEY_INTEREST_RECEIVED]))
+  print('{:>18}: ${:12,.2f}'.format('Fees received', summary[KEY_FEES_RECEIVED]))
+  print('')
+  print('{:>18}: {:13,}'.format('Notes owned', summary[KEY_NOTES_COUNT]))
 
   return summary
 
@@ -131,10 +131,10 @@ def GetPerformanceDetails(options, request):
   # details header
   separator= '{:->81}'.format('')
   header= separator + '\n' + '{:>6} {:>6} {:>16} {:>16} {:>16} {:>16}'.format('grade', 'count', 'invested', 'returned', 'interest', 'payments') + '\n' + separator
-  print
-  print
-  print 'Details'
-  print header
+  print('')
+  print('')
+  print('Details')
+  print(header)
 
   # details by minor grade
   for grade in sorted(performance):
@@ -144,28 +144,28 @@ def GetPerformanceDetails(options, request):
     interest[grade[0]]+= performance[grade][KEY_NOTE_INTEREST_PAID]
     payments[grade[0]]+= performance[grade][KEY_NOTE_PAYMENTS]
 
-    print '{:>6} {:6d}     ${:11,.2f}     ${:11,.2f}     ${:11,.2f}     ${:11,.2f}'.format(grade, performance[grade][KEY_COUNT], performance[grade][KEY_NOTE_AMOUNT], performance[grade][KEY_NOTE_PRINCIPAL_RETURNED], performance[grade][KEY_NOTE_INTEREST_PAID], performance[grade][KEY_NOTE_PAYMENTS])
+    print('{:>6} {:6d}     ${:11,.2f}     ${:11,.2f}     ${:11,.2f}     ${:11,.2f}'.format(grade, performance[grade][KEY_COUNT], performance[grade][KEY_NOTE_AMOUNT], performance[grade][KEY_NOTE_PRINCIPAL_RETURNED], performance[grade][KEY_NOTE_INTEREST_PAID], performance[grade][KEY_NOTE_PAYMENTS]))
 
 
   # details by major grade
-  print header
+  print(header)
   for grade in GRADES:
     count[KEY_TOTAL]+= count[grade]
     invested[KEY_TOTAL]+= invested[grade]
     returned[KEY_TOTAL]+= returned[grade]
     interest[KEY_TOTAL]+= interest[grade]
     payments[KEY_TOTAL]+= payments[grade]
-    print '{:>5}  {:6d}     ${:11,.2f}     ${:11,.2f}     ${:11,.2f}     ${:11,.2f}'.format(grade, count[grade], invested[grade], returned[grade], interest[grade], payments[grade])
+    print('{:>5}  {:6d}     ${:11,.2f}     ${:11,.2f}     ${:11,.2f}     ${:11,.2f}'.format(grade, count[grade], invested[grade], returned[grade], interest[grade], payments[grade]))
 
   # details footer
-  print separator
-  print 'Totals:{:6d}     ${:11,.2f}     ${:11,.2f}     ${:11,.2f}     ${:11,.2f}'.format(count[KEY_TOTAL], invested[KEY_TOTAL], returned[KEY_TOTAL], interest[KEY_TOTAL], payments[KEY_TOTAL])
-  print separator
+  print(separator)
+  print('Totals:{:6d}     ${:11,.2f}     ${:11,.2f}     ${:11,.2f}     ${:11,.2f}'.format(count[KEY_TOTAL], invested[KEY_TOTAL], returned[KEY_TOTAL], interest[KEY_TOTAL], payments[KEY_TOTAL]))
+  print(separator)
 
-  print
-  print
+  print('')
+  print('')
   for status in statusCodes:
-    print '{:6d} {}'.format(statusCodes[status], status)
+    print('{:6d} {}'.format(statusCodes[status], status))
 
 
 
@@ -196,15 +196,15 @@ def main():
     performance= GetPerformanceDetails(options, request)
 
   except Exception as error:
-    print type(error)
-    print error.args[0]
+    print(type(error))
+    print(error.args[0])
     for counter in xrange(1, len(error.args)):
-      print '\t' + str(error.args[counter])
+      print('\t' + str(error.args[counter]))
 
   else:
     if options.debug:
-      print
-      print 'All done!'
+      print('')
+      print('All done!')
 
 
 #
